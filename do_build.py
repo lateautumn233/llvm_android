@@ -53,6 +53,9 @@ def extract_profdata() -> Optional[Path]:
     tar = paths.pgo_profdata_tar()
     if not tar:
         return None
+    profdata_file = paths.OUT_DIR / paths.pgo_profdata_filename()
+    if profdata_file.exists():
+        return profdata_file
     utils.check_call(['tar', '-jxC', str(paths.OUT_DIR), '-f', str(tar)])
     profdata_file = paths.OUT_DIR / paths.pgo_profdata_filename()
     if not profdata_file.exists():
@@ -117,7 +120,7 @@ def build_runtimes(build_lldb_server: bool):
     builders.CompilerRTBuilder().build()
     # 32-bit host crts are not needed for Darwin
     if hosts.build_host().is_linux:
-        builders.CompilerRTHostI386Builder().build()
+        builders.CompilerRTHostAarch64Builder().build()
     builders.LibOMPBuilder().build()
     if build_lldb_server:
         builders.LldbServerBuilder().build()
@@ -412,7 +415,7 @@ def package_toolchain(toolchain_builder: LLVMBuilder,
                 if host.is_darwin:
                     darwin_codesign(binary)
 
-    # FIXME: check that all libs under lib64/clang/<version>/ are created.
+    # FIXME: check that all libs under lib/clang/<version>/ are created.
     for necessary_bin_file in necessary_bin_files:
         if not (bin_dir / necessary_bin_file).is_file():
             raise RuntimeError(f'Did not find {necessary_bin_file} in {bin_dir}')

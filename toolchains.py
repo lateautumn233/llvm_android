@@ -139,7 +139,7 @@ class Toolchain:
 
     @property
     def libcxx_headers(self) -> Path:
-        return self.path / 'include' / 'c++' / 'v1'
+        return self.path / 'include' / 'c++' / '10.2.0'
 
 
 def get_prebuilt_toolchain() -> Toolchain:

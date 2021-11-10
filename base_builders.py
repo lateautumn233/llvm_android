@@ -425,7 +425,7 @@ class CMakeBuilder(Builder):
         env = self.env
         utils.create_script(self.output_dir / 'cmake_invocation.sh', cmake_cmd, env)
         utils.check_call(cmake_cmd, cwd=self.output_dir, env=env)
-
+        self.ninja_targets.append("-j3")
         self._ninja(self.ninja_targets)
         self.install_config()
 
@@ -450,6 +450,7 @@ class LLVMBaseBuilder(CMakeBuilder):  # pylint: disable=abstract-method
             defines['LLVM_ENABLE_ASSERTIONS'] = 'OFF'
 
         # https://github.com/android-ndk/ndk/issues/574 - Don't depend on libtinfo.
+        defines['LLVM_CCACHE_BUILD'] = 'ON'
         defines['LLVM_ENABLE_TERMINFO'] = 'OFF'
         defines['LLVM_ENABLE_THREADS'] = 'ON'
         defines['LLVM_USE_NEWPM'] = 'ON'
@@ -583,6 +584,7 @@ class LLVMBuilder(LLVMBaseBuilder):
 
         if self.libncurses:
             defines['LLDB_ENABLE_CURSES'] = 'ON'
+            defines['CURSES_HAVE_NCURSES_CURSES_H'] = 'ON'
             defines['CURSES_INCLUDE_DIRS'] = str(self.libncurses.include_dir)
             curses_libs = ';'.join(str(lib) for lib in self.libncurses.link_libraries)
             defines['CURSES_LIBRARIES'] = curses_libs
